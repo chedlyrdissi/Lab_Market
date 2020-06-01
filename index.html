@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<! This style sheet is taken from  https://www.w3schools.com/howto/howto_js_tabs.asp>
+	<link href="styles/style.css" rel="stylesheet" type="text/css">
+
+	<title>Lab Market</title>
+</head>
+
+<body>
+
+<div class="row">
+	<img
+		alt="logo" 
+		src="https://media.istockphoto.com/vectors/	shopping-cart-icon-design-cart-icon-symbol-design-vector-id1138644570?k=6&m=1138644570&s=612x612&w=0&h=YDQ1_rwiomJT9R6aGSX3mus0lXcRxGfrlbzLM6vV9eU=">
+
+	<h1>Wecome to Lab Market</h1>
+</div>
+<!-- Tab links, each one with an onclick event associated with it -->
+<div class="tab">
+  <button class="tablinks" onclick="openInfo(event, 'Client')">Client</button>
+  <button class="tablinks" onclick="openInfo(event, 'Products')">Products</button>
+  <button class="tablinks" onclick="openInfo(event, 'Cart')">Cart</button>
+</div>
+
+<!-- Tab content -->
+<div id="Client" class="tabcontent">
+  <h3>Client Information</h3>
+  <p>Tell us a bit about you.</p>
+	Choose a Category:
+		<option value=""></option>
+	<select id="dietSelect" name="dietSelect" onchange="populateListProductChoices()">
+	    <option value="None">None</option>
+		<option value="vegetarian">Vegetarian</option>
+	    <option value="glutenFree">GlutenFree</option>
+	</select>
+	<br/>
+	<br/>
+	<input type="checkbox" name="organic only" onclick="updateOnly('organic',this.checked)"><label> organic only</label>
+	<br/>
+	<input type="checkbox" name="organic only" onclick="updateOnly('lactose',this.checked)"><label> lactose intolerent</label>
+</div>
+
+<div id="Products" class="tabcontent">
+  <h3>Your targeted products</h3>
+  <p>We preselected products based on your restrictions.</p>
+	 Choose items to buy:
+
+	 <div class="row">
+	 	order by: <select onchange="populateListProductChoices(this.value)">
+	 		<option value="None"></option>
+	 		<option value="1"> Price ascending</option>
+	 		<option value="0"> Price descending</option>
+	 	</select>
+	 </div>
+	 <br/>
+	 <div id="displayProduct"></div>
+	 <button id="addCart" type="button" class="block" onclick="selectedItems()">
+		Add selected items to cart.
+	</button>
+</div>
+
+<div id="Cart" class="tabcontent">
+  <h3>Cart</h3>
+  <p>Here is your cart.</p>
+  <div id="displayCart"></div>
+</div>
+
+<footer>
+	Site Web conçu par Chedli Redissi 300074863.
+</footer>
+
+<script src="scripts/groceries.js"></script>
+<script src="scripts/main.js"></script>
+<script type="text/javascript">
+	populateListProductChoices();
+</script>
+</body>
+</html>
