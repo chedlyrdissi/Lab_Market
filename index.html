@@ -1,7 +1,9 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<! This style sheet is taken from  https://www.w3schools.com/howto/howto_js_tabs.asp>
+	<!-- This style sheet is taken from  https://www.w3schools.com/howto/howto_js_tabs.asp -->
+	<!-- side navbar code from: https://www.w3schools.com/howto/howto_js_collapse_sidebar.asp -->
+	<!-- dropdown button code inspired from https://www.w3schools.com/howto/howto_js_dropdown.asp -->
 	<link href="styles/style.css" rel="stylesheet" type="text/css">
 
 	<title>Lab Market</title>
@@ -14,66 +16,141 @@
 		alt="logo" 
 		src="https://media.istockphoto.com/vectors/	shopping-cart-icon-design-cart-icon-symbol-design-vector-id1138644570?k=6&m=1138644570&s=612x612&w=0&h=YDQ1_rwiomJT9R6aGSX3mus0lXcRxGfrlbzLM6vV9eU=">
 
+	<div class="dropdown" style="position: absolute; top: 100px; right: 20px;">
+	  <button onclick="showCart(this)" class="dropbtn">
+	  <img
+			alt = "cart"
+			class = "icon"
+			title = "click here to view the contents of your cart"
+			src = "./Resources/cart-icon.png"/>
+			View the contents of your cart
+		</button>
+	  <div id="myDropdown" class="dropdown-content">
+	    <div id="displayCart"></div>
+	  </div>
+	</div>
+
 	<h1>Wecome to Lab Market</h1>
 </div>
-<!-- Tab links, each one with an onclick event associated with it -->
-<div class="tab">
-  <button class="tablinks" onclick="openInfo(event, 'Client')">Client</button>
-  <button class="tablinks" onclick="openInfo(event, 'Products')">Products</button>
-  <button class="tablinks" onclick="openInfo(event, 'Cart')">Cart</button>
+
+<div id="Home">
+	<button class="start" style="margin-top: 300px;" onclick="navigate('Search')">Start Shopping</button>
 </div>
 
-<!-- Tab content -->
-<div id="Client" class="tabcontent">
-  <h3>Client Information</h3>
-  <p>Tell us a bit about you.</p>
-	Choose a Category:
-		<option value=""></option>
-	<select id="dietSelect" name="dietSelect" onchange="populateListProductChoices()">
-	    <option value="None">None</option>
-		<option value="vegetarian">Vegetarian</option>
-	    <option value="glutenFree">GlutenFree</option>
-	</select>
-	<br/>
-	<br/>
-	<input type="checkbox" name="organic only" onclick="updateOnly('organic',this.checked)"><label> organic only</label>
-	<br/>
-	<input type="checkbox" name="organic only" onclick="updateOnly('lactose',this.checked)"><label> lactose intolerent</label>
+<div id="Search">
+	<ul class="breadcrumb">
+		<li><a href="#" onclick="navigate('Home')">Home</a></li>
+		<li>Search</li>
+	</ul>
+
+	<div style="justify-content: center">
+		<h3> How would you like to browse our products </h3>
+		<div>
+			<button class="accordion" name="Categories">Categories</button>
+			<div class="panel pref">
+			  <ul>
+			  	<li><input type="radio" name="categorySearch" value="fruits" checked="true"> Fruits</li>
+			  	<li><input type="radio" name="categorySearch" value="vegetables"> Vegetables</li>
+			  	<li><input type="radio" name="categorySearch" value="sea food"> Sea food</li>
+			  	<li><input type="radio" name="categorySearch" value="other"> All products</li>
+			  	<li><input type="radio" name="categorySearch" value="dairy"> Dairy products</li>
+			  </ul>
+			</div>
+		</div>
+
+		<div>			
+			<button class="accordion" name="Preferences">Preferences</button>
+			<div class="panel pref">
+				<ul>
+					<li><input type="checkbox" name="preferenceSearch" value="organic"><label>only organic products</label></li>
+					<li><input type="checkbox" name="preferenceSearch" value="glutenFree"><label>only gluten free products</label></li>
+					<li><input type="checkbox" name="preferenceSearch" value="vegetarian"><label>only products for vegetarians</label></li>
+					<li><input type="checkbox" name="preferenceSearch" value="lactose"><label>only products for lactose intolerent customers</label></li>
+				</ul>
+			</div>
+		</div>
+
+		<div>		
+			<button class="accordion" name="Advanced search">Advanced search</button>
+			<div class="panel pref">
+			  <ul>
+			  	<li><input type="radio" name="advanced" value="name" checked="true" onclick="advancedSearchClicked('text')" /> Search by name</li>
+			  	<li><input type="radio" name="advanced" value="price" onclick="advancedSearchClicked('number')"/> Search by price</li>
+			  	<li></li>
+			  	<li><input id="advancedSearchInput" type="text" min="0" /></li>
+			  </ul>
+			  <br/>
+			  
+			  NOTE: Please note that the advanced search return only an exact match
+			</div>
+		</div>
+	</div>
+
+	<button id="doSearchButton" style="margin-top: 15px;" onclick="search()" hidden="true">Search</button>
 </div>
 
-<div id="Products" class="tabcontent">
-  <h3>Your targeted products</h3>
-  <p>We preselected products based on your restrictions.</p>
-	 Choose items to buy:
+<div id="Category">
+	<ul class="breadcrumb">
+		<li><a href="#" onclick="navigate('Home')">Home</a></li>
+		<li><a href="#" onclick="navigate('Search')">Search</a></li>
+		<li id="cat"></li>
+	</ul>
 
-	 <div class="row">
-	 	order by: <select onchange="populateListProductChoices(this.value)">
-	 		<option value="None"></option>
-	 		<option value="1"> Price ascending</option>
-	 		<option value="0"> Price descending</option>
-	 	</select>
-	 </div>
-	 <br/>
-	 <div id="displayProduct"></div>
-	 <button id="addCart" type="button" class="block" onclick="selectedItems()">
-		Add selected items to cart.
-	</button>
+	<div id="mySidebar" class="sidebar">
+  	<label class="closebtn" onclick="toggleSideBar()">&times;</label>
+	<div id="Client" class="">
+		Order by:
+		<div name="order" style="padding-left: 10px;">
+			<div class="row">
+				<div class="col">
+					price
+				</div>
+				<div class="col">
+					<div class="row">
+						<input type="radio" name="order" value="{ &quot;sort&quot;: &quot;price&quot;, &quot;ascending&quot;: true }" checked="true" onclick="populateListProductChoices(this.value)"> ascending
+					</div>
+					<div class="row">
+						<input type="radio" name="order" value="{ &quot;sort&quot;: &quot;price&quot;, &quot;ascending&quot;: false }" onclick="populateListProductChoices(this.value)"> descending
+					</div>
+				</div>
+			</div>
+			
+		</div>
+	</div>
 </div>
 
-<div id="Cart" class="tabcontent">
-  <h3>Cart</h3>
-  <p>Here is your cart.</p>
-  <div id="displayCart"></div>
+	<div id="main">
+		<button class="openbtn" onclick="toggleSideBar()">&#9776; customize your search for product</button>
+		<div id="Products" class="">
+		  	<h3>These are products that fit your preferences</h3>
+		  	<br/>
+		  	<button onclick="navigate('Cart', true)"></button>
+			<button id="addCart" type="button" class="block" onclick="selectedItems()">Add selected items to cart.</button>
+			<div id="displayProduct" style="margin-left: 30%;"></div>
+		</div>
+	</div>
 </div>
 
-<footer>
-	Site Web conçu par Chedli Redissi 300074863.
-</footer>
+<div id="Cart">
+	<ul class="breadcrumb">
+		<li><a href="#" onclick="navigate('Home')">Home</a></li>
+		<li><a href="#" onclick="navigate('Search')">Search</a></li>
+		<li id="cat" onclick="navigate('Category', true)"><a href="#">Products</a></li>
+		<li>Cart</li>
+	</ul>
 
+	<div id="displayCart"></div>
+</div>
+	<footer>
+		Site Web conçu par Chedli Redissi 300074863.
+	</footer>
+<script src="scripts/sidebar.js"></script>
 <script src="scripts/groceries.js"></script>
+<script src="scripts/accordion.js"></script>
 <script src="scripts/main.js"></script>
+<script src="scripts/dropdown.js"></script>
 <script type="text/javascript">
-	populateListProductChoices();
+	navigate("Home");
 </script>
 </body>
 </html>

@@ -10,6 +10,9 @@ var products = [
 		glutenFree: true,
 		lactoseIntolerent: true,
 		organic: true,
+		category: [
+			"other", "organic", "vegetables", "glutenFree", "vegetarian", "lactose"
+		],
 		price: 1.99
 	},
 	{
@@ -18,6 +21,9 @@ var products = [
 		vegetarian: true,
 		glutenFree: false,
 		lactoseIntolerent: true,
+		category: [
+			"other", "vegetarian", "lactose"
+		],
 		price: 2.35
 	},
 	{
@@ -26,6 +32,9 @@ var products = [
 		vegetarian: false,
 		glutenFree: true,
 		lactoseIntolerent: true,
+		category: [
+			"other", "sea food", "lactose", "glutenFree"
+		],
 		price: 10.05
 	},
 	{
@@ -34,6 +43,9 @@ var products = [
 		vegetarian: true,
 		glutenFree: true,
 		lactoseIntolerent: true,
+		category: [
+			"other", "vegetarian", "glutenFree", "lactose"
+		],
 		price: 6.00
 	},
 	{
@@ -42,6 +54,9 @@ var products = [
 		vegetarian: true,
 		glutenFree: true,
 		lactoseIntolerent: false,
+		category: [
+			"other", "glutenFree", "vegetarian", "dairy"
+		],
 		price: 5.35
 	},
 	{
@@ -50,6 +65,9 @@ var products = [
 		vegetarian: false,
 		glutenFree: false,
 		lactoseIntolerent: true,
+		category: [
+			"other", "lactose"
+		],
 		price: 18.99
 	},
 	{
@@ -58,6 +76,9 @@ var products = [
 		vegetarian: true,
 		glutenFree: true,
 		lactoseIntolerent: false,
+		category: [
+			"other", "vegetarian", "dairy", "glutenFree"
+		],
 		price: 4.25
 	},
 	{
@@ -67,6 +88,9 @@ var products = [
 		glutenFree: true,
 		organic: true,
 		lactoseIntolerent: true,
+		category: [
+			"other", "vegetarian", "glutenFree", "lactose", "organic", "vegetables"
+		],
 		price: 2.12
 	},
 	{
@@ -76,6 +100,9 @@ var products = [
 		glutenFree: true,
 		organic: true,
 		lactoseIntolerent: true,
+		category: [
+			"other", "vegetarian", "organic", "lactose", "fruits", "vegetables"
+		],
 		price: 5.00
 	},
 	{
@@ -85,47 +112,86 @@ var products = [
 		glutenFree: true,
 		organic: true,
 		lactoseIntolerent: true,
+		category: [
+			"other", "vegetarian", "glutenFree", "organic", "lactose", "vegetables", "lactose"
+		],
 		price: 3.19
 	},
 ];
 	
 var organicFoodIcon = "https://itsjillicious.com/wp-content/uploads/2014/07/organic.jpeg";
 
-var organicOnly = false;
-var lactoseIntolerentOnly = false;
+var choiceMap = {
+	"vegetarian": false,
+	"glutenFree": false,
+	"organic": false,
+	"lactose": false
+}
 
 var quantityMap = [];
+var chosenProducts = [];
+var cat = [];
+var catMsg;
 
-
+var prefMap = {
+	"vegetarian" : "only products for vegetarians",
+	"glutenFree" : "only gluten free products",
+	"organic" : "only organic products",
+	"lactose" : "only products for lactose intolerent customers",
+	"fruits" : "fruits",
+	"vegetables" : "vegetables",
+	"dairy" : "Dairy products",
+	"sea food" : "Sea food",
+	"other" : "All products"
+}
 // given restrictions provided, make a reduced list of products
 // prices should be included in this list, as well as a sort based on price
 
-function restrictListProducts(prods, restriction) {
+function restrictListProducts() {
 	let list = products.slice();
-	// for (let i=0; i<prods.length; i+=1) {
-	// 	if ((restriction == "Vegetarian") && (prods[i].vegetarian == true)){
-	// 		checkOrganic(organicOnly, product_names, prods[i]);
-	// 	}
-	// 	else if ((restriction == "GlutenFree") && (prods[i].glutenFree == true)){
-	// 		checkOrganic(organicOnly, product_names, prods[i]);
-	// 	}
-	// 	else if (restriction == "None"){
-	// 		checkOrganic(organicOnly, product_names, prods[i]);
-	// 	}
-	// }
 
-	if ( restriction != "None" ) {
-		list = applyFilter(restriction, list, true);
+	const activeAcc = getActiveAccordion();
+
+	if (activeAcc == "Categories") {
+		let categoryChosen;
+		for ( let categor of document.getElementsByName("categorySearch")) {
+			if (categor.checked) {
+				categoryChosen = categor.value;
+				break;
+			}
+		}
+
+		list = list.filter( function( item ) {
+			return item.category.indexOf(categoryChosen) > -1;
+		});
+
+	} else if (activeAcc == "Preferences") {
+
+		for ( let pref of document.getElementsByName("preferenceSearch") ) {
+			if ( pref.checked ) {
+				list = list.filter( function( item ) {
+					return item.category.indexOf(pref.value) > -1;
+				});
+			}
+		}
+
+	} else if (activeAcc == "Advanced search") {
+		if (document.getElementById("advancedSearchInput").type == "number") {
+			list = list.filter( function(item) {
+				return item.price == document.getElementById("advancedSearchInput").value;
+			});
+		} else if (document.getElementById("advancedSearchInput").type == "text") {
+			list = list.filter( function(item) {
+				return item.name == document.getElementById("advancedSearchInput").value;
+			});
+		}
 	}
 
-	if ( organicOnly ) {
-		list = applyFilter( "organic", list, true);
+	for ( const restriction in choiceMap ) {
+		if ( choiceMap[restriction] ) {
+			list = applyFilter(restriction, list);
+		}
 	}
-
-	if (lactoseIntolerentOnly) {
-		list = applyFilter( "lactoseIntolerent", list, true);
-	}
-
 	return list;
 }
 
@@ -139,7 +205,19 @@ function getTotalPrice(chosenProducts) {
 }
 
 function applyFilter( attribute, list, pass ) {
-	return list.filter(function( item ){ 
-		return item[attribute] === pass;
+	return list.filter(function( item ){
+		return item[attribute];
 	});
+}
+
+function advancedSearchClicked( newType ) {
+	document.getElementById("advancedSearchInput").value = "";
+	document.getElementById("advancedSearchInput").type = newType;
+}
+
+function orderProducts( order ) {
+	if ( order !== undefined ) {
+    	const ord = JSON.parse(order);
+	    sortArrayByAttribute( ord.sort, optionArray, ord.ascending );
+    }
 }

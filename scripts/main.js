@@ -1,63 +1,127 @@
 
-// This function is called when any of the tab is clicked
-// It is adapted from https://www.w3schools.com/howto/howto_js_tabs.asp
+var routes = [
+	"Home",
+	"Search",
+	"Category",
+	"Cart"
+]
 
-function openInfo(evt, tabName) {
-
-	// Get all elements with class="tabcontent" and hide them
-	tabcontent = document.getElementsByClassName("tabcontent");
-	for (i = 0; i < tabcontent.length; i++) {
-		tabcontent[i].style.display = "none";
+function navigate( destination, categ = false, msg ) {
+	for( const route of routes ) {
+		document.getElementById(route).style.display = "none";
 	}
-
-	// Get all elements with class="tablinks" and remove the class "active"
-	tablinks = document.getElementsByClassName("tablinks");
-	for (i = 0; i < tablinks.length; i++) {
-		tablinks[i].className = tablinks[i].className.replace(" active", "");
+	if ( categ ) {
+		let elem = document.getElementById("cat");
+		msg = msg === undefined ? getCatString(): msg;
+		if (elem.length) {
+			for ( const ele in elem ) {
+				ele.innerHTML = msg;	
+			}
+		} else {
+			elem.innerHTML = msg;
+		}
+	} else {
+		catmsg = undefined;
 	}
-
-	// Show the current tab, and add an "active" class to the button that opened the tab
-	document.getElementById(tabName).style.display = "block";
-	evt.currentTarget.className += " active";
-
+	if (destination == "Category") {
+		populateListProductChoices( '{"sort": "price", "ascending": true}' );
+	}
+	document.getElementById(destination).style.display = "block";
 }
 
+function search() {
+	let chosenSearch = [];
+	for (let accordion of acc) {
+		if (accordion.classList.contains("active")) {
+			chosenSearch.push(accordion);
+		}
+	}
 
-	
+	if ( chosenSearch.length === 0 ) {
+		alert("Please select a search method");
+	} else if ( chosenSearch.length === 1 ) {
+		// correct flow
+		let choice = chosenSearch[0].name;
+		if (choice == "Advanced search") {
+			if (document.getElementById("advancedSearchInput").value == "") {
+				alert("please input the " + (document.getElementById("advancedSearchInput").type == "text" ? "name": "price") + " of the product you are looking for");
+			} else {
+				let msg = "";
+				if (document.getElementById("advancedSearchInput").type == "number") {
+					msg += "Products for " + document.getElementById("advancedSearchInput").value + "$" ;
+				} else if (document.getElementById("advancedSearchInput").type == "text") {
+					msg += document.getElementById("advancedSearchInput").value;
+				}
+				catmsg = msg;
+				navigate( "Category", true );
+			}
+		} else if (choice == "Preferences") {
+			cat = [];
+			for ( let pref of document.getElementsByName("preferenceSearch") ) {
+				if ( pref.checked ) {
+					cat.push(pref.value);
+				}
+			}
+			if (cat.length === 0) {
+				alert("Please select at least one product preference");
+			} else {
+				catmsg = getCatString();
+				navigate("Category", true);
+			}
+		} else if (choice == "Categories") {
+			cat = [];
+			for ( let categor of document.getElementsByName("categorySearch")) {
+				if (categor.checked) {
+					cat.push(categor.value);
+				}
+			}
+			navigate("Category", true);
+		}
+	} else {
+		alert("An error has occured please select again");
+		clearAccordions();
+	}
+}
+
+function getCatString() {
+	let result = "";
+	for ( let c of cat ) {
+		result += prefMap[c] + " + ";
+	}
+	return result.length === 0 ? "" : result.slice(0, result.length - 3);
+}
+
+function getCurrentCategory() {
+	return cat;
+}
 // generate a checkbox list from a list of products
 // it makes each product name as the label for the checkbos
 
-function populateListProductChoices( order ) {
-	
-	console.log(order);
-
-    var s1 = document.getElementById('dietSelect');
+function populateListProductChoices( order ) {	
     var s2 = document.getElementById('displayProduct');
 	
 	// s2 represents the <div> in the Products tab, which shows the product list, so we first set it empty
     s2.innerHTML = "";
 		
 	// obtain a reduced list of products based on restrictions
-    var optionArray = restrictListProducts(products, s1.value);
+    var optionArray = restrictListProducts();
 
     if ( order !== undefined ) {
-	    sortArrayByAttribute( "price", optionArray, order == "0"? false: true );
+    	const ord = JSON.parse(order);
+	    sortArrayByAttribute( ord.sort, optionArray, ord.ascending );
     }
 
     quantityMap = [];
     for ( const o of optionArray ) {
     	quantityMap[o.name] = 0;
     }
-	// for each item in the array, create a checkbox element, each containing information such as:
-	// <input type="checkbox" name="product" value="Bread">
-	// <label for="Bread">Bread/label><br>
+
 	for (let p of optionArray ) {
 		injectProduct(s2, p);		    
 	}
-	
 }
 
-function injectProduct( destination, product, showInput = true ) {
+function injectProduct( destination, product, showInput = false ) {
 
 	let div = document.createElement("div");
 	div.setAttribute("class", "row");
@@ -94,10 +158,19 @@ function injectProduct( destination, product, showInput = true ) {
 		qtt.setAttribute("class", "quantity");
 		div.appendChild(qtt);
 	} else {
-		let lb = document.createElement('label');
-		lb.innerHTML = "Quantity: " + quantityMap[product.name];
-		div.appendChild(lb);
+		let add = document.createElement('input');
+		add.type = "checkbox";
+		add.name = "product";
+		add.value = product.name;
+		add.style.marginTop = "20px"
+		add.checked = chosenProducts.indexOf(product) > 0;
+		div.appendChild(add);
 	}
+	// else {
+	// 	let lb = document.createElement('label');
+	// 	lb.innerHTML = "Quantity: " + quantityMap[product.name];
+	// 	div.appendChild(lb);
+	// }
 
 	if ( product.organic ) {
 		let organic = document.createElement("img");
@@ -127,18 +200,25 @@ function getProductByName( name ) {
 function selectedItems(){
 	
 	var ele = document.getElementsByName("product");
-	var chosenProducts = [];
 	
 	var c = document.getElementById('displayCart');
 	c.innerHTML = "";
 	
 	// get items and order them
+	// for (i = 0; i < ele.length; i++) {
+	// 	if (ele[i].childNodes[2].value > 0) {
+	// 		quantityMap[ele[i].getAttribute("value")] = ele[i].childNodes[2].value;
+	// 		chosenProducts.push( getProductByName(ele[i].getAttribute("value")) );
+	// 	}
+	// }
+
 	for (i = 0; i < ele.length; i++) {
 		if (ele[i].childNodes[2].value > 0) {
 			quantityMap[ele[i].getAttribute("value")] = ele[i].childNodes[2].value;
 			chosenProducts.push( getProductByName(ele[i].getAttribute("value")) );
 		}
 	}
+
 	// sort
 	sortArrayByAttribute( "price", chosenProducts );
 
@@ -155,15 +235,10 @@ function selectedItems(){
 	// add paragraph and total price
 	c.appendChild(div);
 	c.appendChild(document.createTextNode("Total Price is " + getTotalPrice(chosenProducts)));
-		
 }
 
-function updateOnly( elem ,checked ){
-	if (elem == 'organic') {
-		organicOnly = checked;
-	} else if ( elem == 'lactose') {
-		lactoseIntolerentOnly = checked;
-	}
+function update( elem ,checked ){
+	choiceMap[elem] = checked;
 	populateListProductChoices();
 }
 
