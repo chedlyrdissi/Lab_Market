@@ -13,7 +13,7 @@ div.col {
 
 div.pref {
   text-align: left;
-  margin-left: 30%;
+  margin-left: 35%;
 }
 
 img {
@@ -256,7 +256,8 @@ ul.breadcrumb li a:hover {
   display: none;
   position: absolute;
   min-width: 160px;
-  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+  background-color: white;
+  /*box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);*/
   z-index: 1;
 }
 
@@ -269,7 +270,7 @@ ul.breadcrumb li a:hover {
 }
 
 /* Change color of dropdown links on hover */
-.dropdown-content a:hover {background-color: #ddd}
+.dropdown-content a:hover {background-color: white}
 
 /* Show the dropdown menu (use JS to add this class to the .dropdown-content container when the user clicks on the dropdown button) */
 .show {display:block;}

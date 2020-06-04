@@ -16,7 +16,7 @@
 		alt="logo" 
 		src="https://media.istockphoto.com/vectors/	shopping-cart-icon-design-cart-icon-symbol-design-vector-id1138644570?k=6&m=1138644570&s=612x612&w=0&h=YDQ1_rwiomJT9R6aGSX3mus0lXcRxGfrlbzLM6vV9eU=">
 
-	<div class="dropdown" style="position: absolute; top: 100px; right: 20px;">
+	<div class="dropdown" style="position: absolute; top: 10px; right: 20px;">
 	  <button onclick="showCart(this)" class="dropbtn">
 	  <img
 			alt = "cart"
@@ -27,6 +27,10 @@
 		</button>
 	  <div id="myDropdown" class="dropdown-content">
 	    <div id="displayCart"></div>
+	    <div id="emptyCart">
+	    	Your cart has no products.
+	    	You haven't selected any products yet.
+	    </div>
 	  </div>
 	</div>
 
@@ -120,11 +124,11 @@
 </div>
 
 	<div id="main">
-		<button class="openbtn" onclick="toggleSideBar()">&#9776; customize your search for product</button>
+		<button class="openbtn" onclick="toggleSideBar()">&#9776; change the order of the products that fit your search for product</button>
 		<div id="Products" class="">
-		  	<h3>These are products that fit your preferences</h3>
+		  	<h3>These are products that fit your search preferences</h3>
 		  	<br/>
-		  	<button onclick="navigate('Cart', true)"></button>
+		  	<!-- <button onclick="navigate('Cart', true)"></button> -->
 			<button id="addCart" type="button" class="block" onclick="selectedItems()">Add selected items to cart.</button>
 			<div id="displayProduct" style="margin-left: 30%;"></div>
 		</div>

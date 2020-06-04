@@ -111,10 +111,10 @@ function populateListProductChoices( order ) {
 	    sortArrayByAttribute( ord.sort, optionArray, ord.ascending );
     }
 
-    quantityMap = [];
-    for ( const o of optionArray ) {
-    	quantityMap[o.name] = 0;
-    }
+    // quantityMap = {};
+    // for ( const o of optionArray ) {
+    // 	quantityMap[o.name] = 0;
+    // }
 
 	for (let p of optionArray ) {
 		injectProduct(s2, p);		    
@@ -125,7 +125,7 @@ function injectProduct( destination, product, showInput = false ) {
 
 	let div = document.createElement("div");
 	div.setAttribute("class", "row");
-	div.setAttribute("name", "product");
+	div.setAttribute("name", "div_product");
 	div.setAttribute("value", product.name);
 	
 	let img = document.createElement("img");
@@ -150,27 +150,29 @@ function injectProduct( destination, product, showInput = false ) {
 	div.appendChild(div2);
 
 	if ( showInput ) {
+		let div3 = document.createElement("div");
+		div3.setAttribute("class", "col");
+		div3.appendChild(document.createTextNode("quantity: "));
 		let qtt = document.createElement('input');	
 		qtt.type = "number";
 		qtt.min = 0;
 		qtt.value = quantityMap[product.name];
 		qtt.name = "quantity";
 		qtt.setAttribute("class", "quantity");
-		div.appendChild(qtt);
+		qtt.style.width = "70px";
+		qtt.product = product.name;
+		qtt.addEventListener("change", updateQuantities);
+		div3.appendChild(qtt);
+		div.appendChild(div3);
 	} else {
 		let add = document.createElement('input');
 		add.type = "checkbox";
 		add.name = "product";
 		add.value = product.name;
 		add.style.marginTop = "20px"
-		add.checked = chosenProducts.indexOf(product) > 0;
+		add.checked = quantityMap[product] !== undefined;
 		div.appendChild(add);
 	}
-	// else {
-	// 	let lb = document.createElement('label');
-	// 	lb.innerHTML = "Quantity: " + quantityMap[product.name];
-	// 	div.appendChild(lb);
-	// }
 
 	if ( product.organic ) {
 		let organic = document.createElement("img");
@@ -198,43 +200,53 @@ function getProductByName( name ) {
 // We build a paragraph to contain the list of selected items, and the total price
 
 function selectedItems(){
-	
 	var ele = document.getElementsByName("product");
-	
-	var c = document.getElementById('displayCart');
-	c.innerHTML = "";
-	
-	// get items and order them
-	// for (i = 0; i < ele.length; i++) {
-	// 	if (ele[i].childNodes[2].value > 0) {
-	// 		quantityMap[ele[i].getAttribute("value")] = ele[i].childNodes[2].value;
-	// 		chosenProducts.push( getProductByName(ele[i].getAttribute("value")) );
-	// 	}
-	// }
 
 	for (i = 0; i < ele.length; i++) {
-		if (ele[i].childNodes[2].value > 0) {
-			quantityMap[ele[i].getAttribute("value")] = ele[i].childNodes[2].value;
-			chosenProducts.push( getProductByName(ele[i].getAttribute("value")) );
+		// let pro = getProductByName(ele[i].getAttribute("value"));
+		let pro = ele[i].getAttribute("value");
+		if (ele[i].checked) {
+			if ( !quantityMap[pro] ) {
+				quantityMap[pro] = 1;
+			}
+		} else {
+			delete quantityMap[pro];
 		}
 	}
+	populateCart();
+}
 
-	// sort
-	sortArrayByAttribute( "price", chosenProducts );
-
-	// show the items
-	// build list of selected item
-	var div = document.createElement("div");
-	div.innerHTML = "You selected : ";
-	div.appendChild(document.createElement("br"));
-	for (i = 0; i < chosenProducts.length; i++) { 
-		injectProduct(div, chosenProducts[i], false);
+function populateCart() {
+	var c = document.getElementById('displayCart');
+	c.innerHTML = "";
+	if (Object.keys(quantityMap).length == 0) {
+		document.getElementById("emptyCart").style.display = "block";
+		c.innerHTML = "";
+	} else {
+		document.getElementById("emptyCart").style.display = "none";
+		// sort
+		chosenProducts = [];
+		for ( let p in quantityMap ) {
+			chosenProducts.push(getProductByName(p));
+		}
+		sortArrayByAttribute( "price", chosenProducts );
+		// show the items
+		// build list of selected item
+		var div = document.createElement("div");
+		div.innerHTML = "You selected : ";
 		div.appendChild(document.createElement("br"));
+		for (i = 0; i < chosenProducts.length; i++) { 
+			injectProduct(div, chosenProducts[i], true);
+			div.appendChild(document.createElement("br"));
+		}
+		// add paragraph and total price
+		c.appendChild(div);
+		c.appendChild(document.createTextNode("Total Price is " + getTotalPrice() + "$"));
+
+		let div4 = document.createElement("div");
+		div4.appendChild(document.createTextNode("NOTE: to remove a product from your cart please change the quantity to 0"));
+		c.appendChild(div4);
 	}
-	console.log(quantityMap);
-	// add paragraph and total price
-	c.appendChild(div);
-	c.appendChild(document.createTextNode("Total Price is " + getTotalPrice(chosenProducts)));
 }
 
 function update( elem ,checked ){
@@ -253,4 +265,14 @@ function sortArrayByAttribute( attribute, products, ascending = true ) {
 		}
 	});
 	if (!ascending) products.reverse();
+}
+
+function updateQuantities() {
+	for ( let qt of document.getElementsByName("quantity") ) {
+		quantityMap[qt.product] = qt.value;
+		if ( qt.value == 0 ) {
+			delete quantityMap[qt.product];
+		}
+	}
+	populateCart();
 }

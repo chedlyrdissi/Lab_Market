@@ -128,7 +128,7 @@ var choiceMap = {
 	"lactose": false
 }
 
-var quantityMap = [];
+var quantityMap = {};
 var chosenProducts = [];
 var cat = [];
 var catMsg;
@@ -196,10 +196,10 @@ function restrictListProducts() {
 }
 
 // Calculate the total price of items, with received parameter being a list of products
-function getTotalPrice(chosenProducts) {
+function getTotalPrice() {
 	totalPrice = 0;
-	for (let i=0; i<chosenProducts.length; i+=1) {
-		totalPrice += chosenProducts[i].price;
+	for (let prod in quantityMap) {
+		totalPrice += getProductByName(prod).price * quantityMap[prod];
 	}
 	return totalPrice;
 }
